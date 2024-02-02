@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Time Fixer</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self';">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <h1>Time Fixer</h1>
+
+    <div class="settings">
+        <button id="rcnct">
+            再接続
+        </button>
+        <div>
+            現在時刻: <span id="now-time"></span>
+        </div>
+        <div>
+            <h3>
+                アラーム時間の変更
+            </h3>
+            <label for="alarm-time">アラーム時刻</label>
+            <input type="time" id="alarm-time" value="00:00">
+        </div>
+    </div>
+
+    <details class="loglist">
+        <summary align="center">Logを表示</summary>
+        <div id="log">
+
+        </div>
+    </details>
+
+    <details class="info">
+        <summary class="info-head">
+            Version Info
+        </summary>
+        <div>
+            Chrome <span id="chrome-version"></span>
+        </div>
+        <div>
+            Node.js <span id="node-version"></span>
+        </div>
+        <div>
+            Electron <span id="electron-version"></span>
+        </div>
+        <div>
+            Serialport <span id="serialport-version"></span>
+        </div>
+    </details>
+    <div id="error"></div>
+    <div id="ports"></div>
+</body>
+
+<script src="./renderer.js"></script>
+
+</html>
