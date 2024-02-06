@@ -13,9 +13,11 @@
     <h1>Time Fixer</h1>
 
     <div class="settings">
+        <!--
         <button id="rcnct">
             再接続
         </button>
+        -->
         <div>
             現在時刻: <span id="now-time"></span>
         </div>
@@ -25,6 +27,13 @@
             </h3>
             <label for="alarm-time">アラーム時刻</label>
             <input type="time" id="alarm-time" value="00:00">
+        </div>
+        <div>
+            <h3>
+                画面を表示するために必要な明るさ
+            </h3>
+            <label for="brinum">明るさ</label>
+            <input type="number" id="brinum" value="150" max="500" min="1">
         </div>
     </div>
 

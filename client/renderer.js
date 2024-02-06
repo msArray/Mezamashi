@@ -17,66 +17,74 @@ function extractFourDigitNumber(inputString) {
     return match ? match[1] : null;
 }
 
-function Log(data){
+function Log(data) {
     let element = document.createElement('p');
     element.innerText = data;
     document.getElementById('log').appendChild(element);
 }
 
-class App {
-    constructor() {
-        this.port = new SerialPort({
-            path: 'COM3',
-            baudRate: 9600
-        });
+let port = new SerialPort({
+    path: 'COM3',
+    baudRate: 9600
+});
 
-        //console.log(port.path);
+//console.log(port.path);
 
-        this.parser = this.port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
+let parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
 
-        this.port.on('open', function () {
-            Log(`Serial OPEN ${this.port.path}`);
-            setInterval(() => {
-                document.getElementById('now-time').innerText = new Date();
+port.on('open', function () {
+    Log(`Serial OPEN ${port.path}`);
+    console.log()
+    setInterval(() => {
+        document.getElementById('now-time').innerText = new Date();
 
-                this.port.write(new Buffer.from(`t${new Date().getHours()}${new Date().getMinutes()}\n`), function (err, results) {
-                    if (err) {
-                        console.log('Err: ' + err);
-                        console.log('Results: ' + results);
-                    }
-                });
-            }, 1000);
-        });
-
-        this.parser.on('data', function (data) {
-            console.log('Data: ' + data);
-            if (isMatchingString(data) && document.getElementById('alarm-time') != document.activeElement) {
-                let AlarmTime = `${extractFourDigitNumber(data)}`;
-                console.log(AlarmTime.substr(0, 2) + ":" + AlarmTime.substr(2, 2));
-                document.getElementById('alarm-time').value = AlarmTime.substr(0, 2) + ":" + AlarmTime.substr(2, 2);
+        port.write(new Buffer.from(`t${new Date().getHours()}${new Date().getMinutes()}\n`), function (err, results) {
+            if (err) {
+                console.log('Err: ' + err);
+                console.log('Results: ' + results);
             }
-            Log(data);
-            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
         });
+    }, 1000);
+});
 
-        document.getElementById('alarm-time').addEventListener('blur', () => {
-            Log(`${document.getElementById('alarm-time').value.replace(":", "")}`);
-            
-            this.port.write(new Buffer.from(`a${document.getElementById('alarm-time').value.replace(":", "")}\n`), function (err, results) {
-                if (err) {
-                    console.log('Err: ' + err);
-                    console.log('Results: ' + results);
-                }
-            });
-        })
+parser.on('data', function (data) {
+    console.log('Data: ' + data);
+    Log(`${new Date()} : ${data}`);
+    if (isMatchingString(data) && document.getElementById('alarm-time') != document.activeElement) {
+        let AlarmTime = `${extractFourDigitNumber(data)}`;
+        console.log(AlarmTime.substr(0, 2) + ":" + AlarmTime.substr(2, 2));
+        document.getElementById('alarm-time').value = AlarmTime.substr(0, 2) + ":" + AlarmTime.substr(2, 2);
     }
+    if (data[0] == 'b' && document.getElementById('brinum') != document.activeElement) {
+        console.log(data.substr(0, 1));
+        document.getElementById('brinum').value = data.slice(1);
+    }
+    document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+});
+
+document.getElementById('alarm-time').addEventListener('blur', () => {
+    Log(`${document.getElementById('alarm-time').value.replace(":", "")}`);
+
+    port.write(new Buffer.from(`a${document.getElementById('alarm-time').value.replace(":", "")}\n`), function (err, results) {
+        if (err) {
+            console.log('Err: ' + err);
+            console.log('Results: ' + results);
+        }
+    });
+})
+
+function modifyNumber(input) {
+    if (input < 10) return `c00${input}`;
+    else if (input < 100) return `c0${input}`;
+    else return `c${input}`;
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    let app = [new App()];
-
-    document.getElementById('rcnct').addEventListener('click', () => {
-        app[0] = "";
-        app = [new App()];
+document.getElementById('brinum').addEventListener('blur', () => {
+    Log(new Buffer.from(`${modifyNumber(document.getElementById('brinum').value)}\n`));
+    port.write(new Buffer.from(`${modifyNumber(document.getElementById('brinum').value)}\n`), function (err, results) {
+        if (err) {
+            console.log('Err: ' + err);
+            console.log('Results: ' + results);
+        }
     });
-});
+})

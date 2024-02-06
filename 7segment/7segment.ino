@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 const int ASeg = 11;
 const int BSeg = 7;
@@ -29,6 +30,8 @@ const int LED_KETA_ON = HIGH;
 const int LED_KETA_OFF = LOW;
 // delay(ms) /
 const int TIMER_DELAY = 2;  // セグメントの文字を切り替える遅延なのでなるべく小さく
+
+int CheckBright = 100;
 
 // セグメントの値
 uint8_t segChars[4] = { 0, 0, 0, 0 };
@@ -205,11 +208,6 @@ void light(int target, int num) {
   digitalWrite(DotSeg, LED_OFF);
 }
 
-char intToChar(int asciiValue) {
-  // 引数として渡されたASCIIコードをchar型に変換して返す
-  return static_cast<char>(asciiValue);
-}
-
 int GetTimeVal() {
   String TimeValue;
   int TimeNum = -1;
@@ -219,6 +217,7 @@ int GetTimeVal() {
 }
 
 int ctoi(char c) {
+  if(c == '0') return 0;
   if (c >= '0' && c <= '9') {
     return c - '0';
   }
@@ -292,7 +291,7 @@ void loop() {
         light(KetaSegments[i], segChars[i]);
       delay(TIMER_DELAY);
     };
-  } else if (Brightness >= 150) {
+  } else if (Brightness >= CheckBright) {
     /* TIMER_DELAYごとに各桁を表示 */
     for (int i = 0; i < 4; i++) {
       if ((millis() / 500) % 2 == 0 && i == segSelector && modeSettingAlarm > 0)
@@ -409,11 +408,19 @@ void loop() {
       break;
     bufferStr.concat((char)recieveByte);
 
+    if (bufferStr.length() == 4) {
+      if (bufferStr[0] == 'c') {
+        Serial.print(ctoi(bufferStr[1]) * 100 + ctoi(bufferStr[2]) * 10 + ctoi(bufferStr[3]));
+        Serial.println("hg");
+        CheckBright = ctoi(bufferStr[1]) * 100 + ctoi(bufferStr[2]) * 10 + ctoi(bufferStr[3]);
+      }
+    }
+
     if (bufferStr.length() == 5) {
-      Serial.print("Arduino: ");
-      Serial.println(bufferStr);
-      Serial.print("Arduino: Message Length is ");
-      Serial.println(bufferStr.length());
+      Serial.print("Arduino: Now Bright is ");
+      Serial.println(Brightness);
+      Serial.print("b");
+      Serial.println(CheckBright);
       Serial.print("Arduino: now_alarm_");
       for (int i = 0; i < 4; i++) {
         Serial.print(alarmTime[i]);
@@ -431,4 +438,6 @@ void loop() {
       }
     }
   }
+
+  Serial.println("");
 }
