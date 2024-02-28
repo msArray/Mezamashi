@@ -27,18 +27,39 @@ let port = new SerialPort({
     path: 'COM3',
     baudRate: 9600
 });
+port.set({ dtr: false })
 
 //console.log(port.path);
 
 let parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
 
+function modifyNum(input) {
+    // 入力された数字が10未満の場合は、百の位に0を追加
+    if (input < 10) {
+        return "000" + input;
+    }
+
+    // 入力された数字が10以上かつ100未満の場合は、十の位に0を追加
+    else if (input < 100) {
+        return "00" + input;
+    }
+
+    else if (input < 1000) {
+        return "0" + input;
+    }
+
+    // 入力された数字が100以上かつ500以下の場合は、何も変更せずそのまま返す
+    else {
+        return input.toString();
+    }
+}
+
 port.on('open', function () {
     Log(`Serial OPEN ${port.path}`);
-    console.log()
     setInterval(() => {
         document.getElementById('now-time').innerText = new Date();
 
-        port.write(new Buffer.from(`t${new Date().getHours()}${new Date().getMinutes()}\n`), function (err, results) {
+        port.write(new Buffer.from(`t${modifyNum(new Date().getHours() * 100 + new Date().getMinutes())}\n`), function (err, results) {
             if (err) {
                 console.log('Err: ' + err);
                 console.log('Results: ' + results);

@@ -46,6 +46,7 @@ bool isAlarm = true;
 // データ取得用
 int recieveByte = 0;
 String bufferStr = "";
+//int connectionDelay = 0;
 
 /* initial setting 初期設定 */
 void setup() {
@@ -253,11 +254,11 @@ void loop() {
   for (int i = 0; i < 4; i++) {
     if (segChars[i] >= 10)
       segChars[i] = 0;
-    if (segChars[0] >= 3)
+    if (segChars[0] >= 3)                       
       segChars[0] = 0;
     if (segChars[0] == 2 && segChars[1] >= 4)
       segChars[1] = 0;
-    if (segChars[2] >= 7)
+    if (segChars[2] >= 6)
       segChars[2] = 0;
   }
   for (int i = 0; i < 4; i++) {
@@ -267,7 +268,7 @@ void loop() {
       alarmTime[0] = 0;
     if (alarmTime[0] == 2 && alarmTime[1] >= 4)
       alarmTime[1] = 0;
-    if (alarmTime[2] >= 7)
+    if (alarmTime[2] >= 6)
       alarmTime[2] = 0;
   }
   if (segSelector >= 4)
@@ -366,7 +367,7 @@ void loop() {
 
   static bool isUpdateTime = false;
   if (modeFixTime == 0) {
-    if ((millis() / 1000) % 60 == 0 && isUpdateTime == false && !Serial.available()) {
+    if ((millis() / 1000) % 60 == 0 && isUpdateTime == false) {
       segChars[3]++;
       if (segChars[3] > 9) {
         segChars[3] = 0;
@@ -407,6 +408,7 @@ void loop() {
     if (recieveByte == (int)'\n')
       break;
     bufferStr.concat((char)recieveByte);
+    //Serial.println(bufferStr);
 
     if (bufferStr.length() == 4) {
       if (bufferStr[0] == 'c') {
@@ -438,6 +440,4 @@ void loop() {
       }
     }
   }
-
-  Serial.println("");
 }
